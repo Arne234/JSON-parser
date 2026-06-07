@@ -353,6 +353,8 @@ std::vector<JsonValue> JSONParser::parseArray() {
 
         res.push_back(parseValue());
 
+        skipWhiteSpaces();
+
         if (reader.eof()) {
             break;
         }

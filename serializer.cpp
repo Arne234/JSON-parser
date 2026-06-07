@@ -87,7 +87,7 @@ std::string Serializer::serializeString(const std::string& str) {
         switch(c) {
 
             case '"':
-                res += '\\\"';
+                res += "\\\"";
                 break;
 
             case '\\':
@@ -95,23 +95,23 @@ std::string Serializer::serializeString(const std::string& str) {
                 break;
 
             case '\n':
-                res += '\\n';
+                res += "\\n";
                 break;
 
             case '\t':
-                res += '\\t';
+                res += "\\t";
                 break;
 
             case '\b':
-                res += '\\b';
+                res += "\\b";
                 break;
 
             case '\r':
-                res += '\\r';
+                res += "\\r";
                 break;
 
             case '\f':
-                res += '\\f';
+                res += "\\f";
                 break;
 
             default:

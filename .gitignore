@@ -1,0 +1,11 @@
+# Build files
+*.exe
+*.obj
+*.o
+
+# IDE
+.vs/
+.vscode/
+
+# Build folders
+build/
