@@ -11,10 +11,26 @@ void JSONParser::skipWhiteSpaces() {
     }
 }
 
+JsonValue JSONParser::parse() {
+    JsonValue res = parseValue();
+
+    skipWhiteSpaces();
+
+    if (!reader.eof()) {
+        throw ParseError("Unexpected characters after JSON", reader.getPos());
+    }
+
+    return res;
+}
+
 
 JsonValue JSONParser::parseValue() {
     
     skipWhiteSpaces();
+
+    if (reader.eof()) {
+        throw ParseError("No data at ", reader.getPos());
+    }
 
 
     char c = reader.peek();
@@ -44,7 +60,6 @@ JsonValue JSONParser::parseValue() {
     }
 
     throw ParseError("No matching datatype at ", reader.getPos());
-
 
 }
 
@@ -165,8 +180,12 @@ double JSONParser::parseNum() {
         }
     }
 
-    if (reader.peek() == '0' && reader.advance() == std::isdigit(static_cast<unsigned char>(reader.peek()))) {
-        throw ParseError("Invalid number at ", reader.getPos());
+    if (reader.peek() == '0') {
+        res += reader.advance();
+
+        if (!reader.eof() && std::isdigit(static_cast<unsigned char>(reader.peek()))) {
+            throw ParseError("Leading zeros not allowed at ", reader.getPos());
+        }
     }
 
     while (!reader.eof() && std::isdigit(static_cast<unsigned char>(reader.peek()))) {
@@ -287,7 +306,7 @@ std::unordered_map<std::string, JsonValue> JSONParser::parseObject() {
 
         skipWhiteSpaces();
 
-        if (reader.peek() != ':') {
+        if (!reader.eof() || reader.peek() != ':') {
             throw ParseError("Wrong key type at ", reader.getPos());
         }
 
@@ -295,7 +314,7 @@ std::unordered_map<std::string, JsonValue> JSONParser::parseObject() {
 
         skipWhiteSpaces();
 
-        map[key] = parseValue();
+        map.emplace(key, parseValue());
 
         if (reader.eof()) {
             break;

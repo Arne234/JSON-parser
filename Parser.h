@@ -12,6 +12,7 @@ class JSONParser {
     public:
         JSONParser(const std::string& text) : reader(text) {}
 
+        JsonValue parse();
         JsonValue parseValue();
         std::string parseString();
         double parseNum();

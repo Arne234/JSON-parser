@@ -14,8 +14,8 @@ class Reader {
         Reader(const std::string& t) : text(t) {}
 
 
-        char peek();
+        char peek() const;
         char advance();
-        bool eof(); 
-        size_t getPos();
+        bool eof() const; 
+        size_t getPos() const;
 };

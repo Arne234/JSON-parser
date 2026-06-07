@@ -25,11 +25,11 @@ class JsonValue {
     public:
 
         JsonValue(const std::string& s) : value(s) {}
-        JsonValue(const double d) : value(d) {}
-        JsonValue(const bool b) : value(b) {}
-        JsonValue(const std::nullptr_t n) : value(n) {}
-        JsonValue(const std::vector<JsonValue>& v) : value(v) {}
-        JsonValue(const std::unordered_map<std::string, JsonValue>& u) : value(u) {}
+        JsonValue(double d) : value(d) {}
+        JsonValue(bool b) : value(b) {}
+        JsonValue(std::nullptr_t n) : value(n) {}
+        JsonValue(std::vector<JsonValue>&& v) : value(v) {}
+        JsonValue(std::unordered_map<std::string, JsonValue>&& u) : value(u) {}
 
         bool isString() const;
         bool isNum() const;
@@ -38,11 +38,11 @@ class JsonValue {
         bool isArray() const;
         bool isObject() const;
 
-        const std::string& asString () const;
-        const double asNum() const;
-        const bool asBool() const;
-        const std::nullptr_t asNull() const;
-        const std::vector<JsonValue>& asArray() const;
-        const std::unordered_map<std::string, JsonValue>& asObject() const;
+        std::string& asString () const;
+        double asNum() const;
+        bool asBool() const;
+        std::nullptr_t asNull() const;
+        std::vector<JsonValue>& asArray() const;
+        std::unordered_map<std::string, JsonValue>& asObject() const;
 
 };

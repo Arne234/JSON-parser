@@ -6,8 +6,12 @@
 
 
 
-char Reader::peek() {
+char Reader::peek() const {
 
+    if (eof()) {
+        throw std::out_of_range("peek past end");
+    }
+    
     return text[pos];
 }
 
@@ -19,10 +23,10 @@ char Reader::advance() {
 }
 
 
-bool Reader::eof() {
+bool Reader::eof() const {
     return pos >= text.size();
 }
 
-size_t Reader::getPos() {
+size_t Reader::getPos() const {
     return pos;
 }
