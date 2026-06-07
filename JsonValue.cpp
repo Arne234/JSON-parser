@@ -40,17 +40,17 @@ const std::string& JsonValue::asString() const {
 }
 
 
-const double JsonValue::asNum() const {
+double JsonValue::asNum() const {
     return std::get<double>(value);
 }
 
 
-const bool JsonValue::asBool() const {
+bool JsonValue::asBool() const {
     return std::get<bool>(value);
 }
 
 
-const std::nullptr_t JsonValue::asNull() const {
+std::nullptr_t JsonValue::asNull() const {
     return std::get<std::nullptr_t>(value);
 }
 

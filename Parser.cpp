@@ -306,7 +306,7 @@ std::unordered_map<std::string, JsonValue> JSONParser::parseObject() {
 
         skipWhiteSpaces();
 
-        if (!reader.eof() || reader.peek() != ':') {
+        if (reader.eof() || reader.peek() != ':') {
             throw ParseError("Wrong key type at ", reader.getPos());
         }
 

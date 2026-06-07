@@ -38,11 +38,11 @@ class JsonValue {
         bool isArray() const;
         bool isObject() const;
 
-        std::string& asString () const;
+        const std::string& asString () const;
         double asNum() const;
         bool asBool() const;
         std::nullptr_t asNull() const;
-        std::vector<JsonValue>& asArray() const;
-        std::unordered_map<std::string, JsonValue>& asObject() const;
+        const std::vector<JsonValue>& asArray() const;
+        const std::unordered_map<std::string, JsonValue>& asObject() const;
 
 };
