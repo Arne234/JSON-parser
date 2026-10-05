@@ -1,7 +1,6 @@
 #include "Reader.h"
-#include "ErrorClass.h"
 
-#include <iostream>
+#include <stdexcept>
 #include <string>
 
 

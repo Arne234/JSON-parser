@@ -6,8 +6,15 @@
 
 
 void JSONParser::skipWhiteSpaces() {
-    while (!reader.eof() && std::isspace(static_cast<unsigned char>(reader.peek()))) {
-        reader.advance();
+    while (!reader.eof()) {
+        char c = reader.peek();
+
+        if (c == ' ' || c == '\t' || c == '\n' || c == '\r') {
+            reader.advance();
+        }
+        else {
+            break;
+        }
     }
 }
 
@@ -29,7 +36,7 @@ JsonValue JSONParser::parseValue() {
     skipWhiteSpaces();
 
     if (reader.eof()) {
-        throw ParseError("No data at ", reader.getPos());
+        throw ParseError("No data", reader.getPos());
     }
 
 
@@ -39,7 +46,7 @@ JsonValue JSONParser::parseValue() {
         return parseString(); 
     }
 
-    if (c == '-' || std::isdigit(c)) {
+    if (c == '-' || std::isdigit(static_cast<unsigned char>(c))) {
         return parseNum(); 
     }
 
@@ -59,7 +66,7 @@ JsonValue JSONParser::parseValue() {
         return parseObject(); 
     }
 
-    throw ParseError("No matching datatype at ", reader.getPos());
+    throw ParseError("No matching datatype", reader.getPos());
 
 }
 
@@ -83,7 +90,7 @@ std::string JSONParser::parseString() {
             reader.advance();
 
             if (reader.eof()) {
-                throw ParseError("Invalid escape sequence at ", reader.getPos());
+                throw ParseError("Invalid escape sequence", reader.getPos());
             }
 
             char n = reader.peek();
@@ -153,7 +160,7 @@ std::string JSONParser::parseString() {
                     }
 
                 default:
-                    throw ParseError("Invalid escape sequence at ", reader.getPos());
+                    throw ParseError("Invalid escape sequence", reader.getPos());
                     break;
 
             }
@@ -161,11 +168,15 @@ std::string JSONParser::parseString() {
         }
         
         else {
+            if (static_cast<unsigned char>(c) < 0x20) {
+                throw ParseError("Invalid control character in string", reader.getPos());
+            }
+
             newString += c;
             reader.advance();
         }
     }
-    throw ParseError("Unterminated string at ", reader.getPos());
+    throw ParseError("Unterminated string", reader.getPos());
 }
 
 
@@ -176,7 +187,7 @@ double JSONParser::parseNum() {
         res += reader.advance();
 
         if (reader.eof()) {
-            throw ParseError("Invalid number at ", reader.getPos());
+            throw ParseError("Invalid number", reader.getPos());
         }
     }
 
@@ -184,32 +195,50 @@ double JSONParser::parseNum() {
         res += reader.advance();
 
         if (!reader.eof() && std::isdigit(static_cast<unsigned char>(reader.peek()))) {
-            throw ParseError("Leading zeros not allowed at ", reader.getPos());
+            throw ParseError("Leading zeros not allowed", reader.getPos());
         }
     }
 
-    while (!reader.eof() && std::isdigit(static_cast<unsigned char>(reader.peek()))) {
-        res += reader.advance();
+    else if (!reader.eof() && reader.peek() >= '1' && reader.peek() <= '9') {
+        while (!reader.eof() && std::isdigit(static_cast<unsigned char>(reader.peek()))) {
+            res += reader.advance();
+        }
     }
 
+    else {
+        throw ParseError("Invalid number", reader.getPos());
+    }
 
     if (!reader.eof() && reader.peek() == '.') {
         res += reader.advance();
 
         if (reader.eof() || !std::isdigit(static_cast<unsigned char>(reader.peek()))) {
-            throw ParseError("Invalid number at ", reader.getPos());
+            throw ParseError("Invalid number", reader.getPos());
         }
 
-        while (!reader.eof() && std::isdigit(reader.peek())) {
+        while (!reader.eof() && std::isdigit(static_cast<unsigned char>(reader.peek()))) {
             res += reader.advance();
         }
     }
 
-    if (!reader.eof()) {
-        char c = reader.peek();
+    if (!reader.eof() &&
+        (reader.peek() == 'e' || reader.peek() == 'E')) {
 
-        if (c != ',' && c != ']' && c != '}' && !std::isspace(c)) {
-            throw ParseError("Invalid number termination at ", reader.getPos());
+        res += reader.advance();
+
+        if (!reader.eof() &&
+            (reader.peek() == '+' || reader.peek() == '-')) {
+            res += reader.advance();
+        }
+
+        if (reader.eof() ||
+            !std::isdigit(static_cast<unsigned char>(reader.peek()))) {
+            throw ParseError("Invalid exponent", reader.getPos());
+        }
+
+        while (!reader.eof() &&
+               std::isdigit(static_cast<unsigned char>(reader.peek()))) {
+            res += reader.advance();
         }
     }
 
@@ -224,7 +253,7 @@ bool JSONParser::parseBool() {
 
         for (char c : t) {
             if (reader.eof() || c != reader.peek()) {
-                throw ParseError("Invalid boolean value at ", reader.getPos());
+                throw ParseError("Invalid boolean value", reader.getPos());
             }
             else {
                 reader.advance();
@@ -234,7 +263,7 @@ bool JSONParser::parseBool() {
             char c = reader.peek();
 
             if (c != ',' && c != ']' && c != '}' && !std::isspace(c)) {
-                throw ParseError("Invalid boolean termination at ", reader.getPos());
+                throw ParseError("Invalid boolean termination", reader.getPos());
             }
         }
         return true;
@@ -245,7 +274,7 @@ bool JSONParser::parseBool() {
 
         for (char c : f) {
             if (reader.eof() || c != reader.peek()) {
-                throw ParseError("Invalid boolean value at ", reader.getPos());
+                throw ParseError("Invalid boolean value", reader.getPos());
             }
             else {
                 reader.advance();
@@ -255,7 +284,7 @@ bool JSONParser::parseBool() {
             char c = reader.peek();
 
             if (c != ',' && c != ']' && c != '}' && !std::isspace(c)) {
-                throw ParseError("Invalid boolean termination at ", reader.getPos());
+                throw ParseError("Invalid boolean termination", reader.getPos());
             }
         }
         return false;
@@ -268,7 +297,7 @@ std::nullptr_t JSONParser::parseNull() {
 
     for (char c : n) {
         if (reader.eof() || c != reader.peek()) {
-            throw ParseError("Invalid null value at ", reader.getPos());
+            throw ParseError("Invalid null value", reader.getPos());
         }
         else {
             reader.advance();
@@ -278,7 +307,7 @@ std::nullptr_t JSONParser::parseNull() {
         char c = reader.peek();
 
         if (c != ',' && c != ']' && c != '}' && !std::isspace(c)) {
-            throw ParseError("Invalid null termination at ", reader.getPos());
+            throw ParseError("Invalid null termination", reader.getPos());
         }
     }
     return nullptr;
@@ -299,7 +328,7 @@ std::unordered_map<std::string, JsonValue> JSONParser::parseObject() {
     while (!reader.eof()) {
         
         if (reader.peek() != '"') {
-            throw ParseError("Wrong key type at ", reader.getPos());
+            throw ParseError("Wrong key type", reader.getPos());
         }
 
         std::string key = parseString();
@@ -307,14 +336,19 @@ std::unordered_map<std::string, JsonValue> JSONParser::parseObject() {
         skipWhiteSpaces();
 
         if (reader.eof() || reader.peek() != ':') {
-            throw ParseError("Wrong key type at ", reader.getPos());
+            throw ParseError("Wrong key type", reader.getPos());
         }
 
         reader.advance();
 
         skipWhiteSpaces();
 
-        map.emplace(key, parseValue());
+        auto [it, inserted] =map.emplace(key, parseValue());
+        if (!inserted) {
+            throw ParseError("Duplicate key in object", reader.getPos());
+        }
+
+        skipWhiteSpaces();
 
         if (reader.eof()) {
             break;
@@ -327,12 +361,13 @@ std::unordered_map<std::string, JsonValue> JSONParser::parseObject() {
 
         if (reader.peek() == ',') {
             reader.advance();
+            skipWhiteSpaces();
             continue;
         }
 
-        throw ParseError("Invalid comma seperation in object at ", reader.getPos());
+        throw ParseError("Invalid comma seperation in object", reader.getPos());
     }
-    throw ParseError("No closing brackets at ", reader.getPos());
+    throw ParseError("No closing brackets", reader.getPos());
 }
 
 
@@ -369,8 +404,8 @@ std::vector<JsonValue> JSONParser::parseArray() {
             continue;
         }
 
-        throw ParseError("Invalid comma seperation in array at ", reader.getPos());
+        throw ParseError("Invalid comma seperation in array", reader.getPos());
 
     }
-    throw ParseError("No closing brackets at ", reader.getPos());
+    throw ParseError("No closing brackets", reader.getPos());
 }

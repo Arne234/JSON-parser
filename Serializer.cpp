@@ -1,6 +1,6 @@
-#include "serializer.h"
+#include "Serializer.h"
 
-#include <iostream>
+#include <string>
 #include <format>
 
 
@@ -83,7 +83,7 @@ std::string Serializer::serialize(const JsonValue& value) {
 std::string Serializer::serializeString(const std::string& str) {
     std::string res;
 
-    for (char c : str) {
+    for (unsigned char c : str) {
         switch(c) {
 
             case '"':
@@ -115,7 +115,16 @@ std::string Serializer::serializeString(const std::string& str) {
                 break;
 
             default:
-                res += c;
+                if (c < 0x20) {
+                    const char* hex = "0123456789abcdef";
+
+                    res += "\\u00";
+                    res += hex[(c >> 4) & 0x0F];
+                    res += hex[c & 0x0F];
+                }
+                else {
+                    res += static_cast<char>(c);
+                }
         }
     }
     return res;

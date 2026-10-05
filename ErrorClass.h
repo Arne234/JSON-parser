@@ -1,6 +1,8 @@
 #pragma once
 
 #include <stdexcept>
+#include <string>
+#include <cstddef>
 
 class ParseError : public std::runtime_error {
     private:
@@ -11,7 +13,7 @@ class ParseError : public std::runtime_error {
             std::runtime_error(message), position(pos) {}
 
 
-        size_t getPos() {
+        size_t getPos() const {
             return position;
         }
 };

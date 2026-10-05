@@ -1,5 +1,6 @@
 #pragma once
 
+#include <utility>
 #include <unordered_map>
 #include <vector>
 #include <variant>
@@ -28,8 +29,8 @@ class JsonValue {
         JsonValue(double d) : value(d) {}
         JsonValue(bool b) : value(b) {}
         JsonValue(std::nullptr_t n) : value(n) {}
-        JsonValue(std::vector<JsonValue>&& v) : value(v) {}
-        JsonValue(std::unordered_map<std::string, JsonValue>&& u) : value(u) {}
+        JsonValue(std::vector<JsonValue>&& v) : value(std::move(v)) {}
+        JsonValue(std::unordered_map<std::string, JsonValue>&& u) : value(std::move(u)) {}
 
         bool isString() const;
         bool isNum() const;
